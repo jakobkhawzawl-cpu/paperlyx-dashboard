@@ -5,75 +5,59 @@
 
   <!-- Supabase v2 (IMPORTANT) -->
 <script>
-document.getElementById("status").innerText = "Testing connection...";
+document.addEventListener("DOMContentLoaded", function () {
 
-fetch("https://dvjybwqyeraasykclvzy.supabase.co")
-  .then(res => {
-    document.getElementById("status").innerText = "Connection OK ✅";
-  })
-  .catch(err => {
-    document.getElementById("status").innerText = "Failed to fetch ❌";
-    console.log(err);
-  });
+  const supabaseUrl = "https://dvjybwqyeraasykclvzy.supabase.co";
+  const supabaseKey = "YOUR_ANON_KEY";
+
+  const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+  async function signIn() {
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+
+    const { data, error } = await supabaseClient.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    if (error) {
+      alert(error.message);
+    } else {
+      alert("Login successful!");
+      loadUser();
+    }
+  }
+
+  async function loadUser() {
+    document.getElementById("status").innerText = "Loading...";
+
+    const { data: { user } } = await supabaseClient.auth.getUser();
+
+    if (!user) {
+      document.getElementById("status").innerText = "Not logged in";
+      return;
+    }
+
+    const { data } = await supabaseClient
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", user.id)
+      .single();
+
+    document.getElementById("status").innerText = "Loaded";
+
+    if (data?.role === "admin") {
+      document.getElementById("adminPanel").style.display = "block";
+    }
+  }
+
+  // expose button function
+  window.signIn = signIn;
+
+  loadUser();
+});
 </script>
-const supabaseUrl = "https://dvjybwqyeraasykclvzy.supabase.co";
-const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR2eWpid3F5ZXJhYXN5a2Nsdnp5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5NjYyMzcsImV4cCI6MjA5MjU0MjIzN30.vNkfwSG3PklevSuE-cyVLEgIlgpljb0CNkH-efSemA4";
-
-// ✅ Correct client
-const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
-
-// 🔐 Sign In
-async function signIn() {
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
-
-  const { data, error } = await supabaseClient.auth.signInWithPassword({
-    email,
-    password
-  });
-
-  console.log("LOGIN:", data, error);
-
-  if (error) {
-    alert(error.message);
-  } else {
-    alert("Login successful!");
-    loadUser(); // reload after login
-  }
-}
-
-// 👤 Load User
-async function loadUser() {
-  console.log("START");
-
-  const { data: { user } } = await supabaseClient.auth.getUser();
-  console.log("USER:", user);
-
-  if (!user) {
-    document.getElementById("status").innerText = "Not logged in";
-    return;
-  }
-
-  // 🔐 Get role
-  const { data, error } = await supabaseClient
-    .from("user_roles")
-    .select("role")
-    .eq("user_id", user.id)
-    .single();
-
-  console.log("ROLE:", data, error);
-
-  document.getElementById("status").innerText = "Loaded";
-
-  if (data?.role === "admin") {
-    document.getElementById("adminPanel").style.display = "block";
-  }
-}
-
-// Run on load
-loadUser();
-</script>
-
 </body>
 </html>
   
