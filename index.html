@@ -4,27 +4,18 @@
   <title>Paperlyx Dashboard</title>
 
   <!-- Supabase v2 (IMPORTANT) -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-</head>
-
-<body>
-
-<h1>Paperlyx Dashboard</h1>
-
-<!-- Login -->
-<input type="email" id="email" placeholder="Enter email">
-<input type="password" id="password" placeholder="Enter password">
-<button onclick="signIn()">Sign In</button>
-
-<p id="status">Loading...</p>
-
-<!-- Admin Panel -->
-<div id="adminPanel" style="display:none;">
-  <h2>Admin Panel</h2>
-  <p>Welcome Admin ✅</p>
-</div>
-
 <script>
+document.getElementById("status").innerText = "Testing connection...";
+
+fetch("https://dvjybwqyeraasykclvzy.supabase.co")
+  .then(res => {
+    document.getElementById("status").innerText = "Connection OK ✅";
+  })
+  .catch(err => {
+    document.getElementById("status").innerText = "Failed to fetch ❌";
+    console.log(err);
+  });
+</script>
 const supabaseUrl = "https://dvjybwqyeraasykclvzy.supabase.co";
 const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR2eWpid3F5ZXJhYXN5a2Nsdnp5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5NjYyMzcsImV4cCI6MjA5MjU0MjIzN30.vNkfwSG3PklevSuE-cyVLEgIlgpljb0CNkH-efSemA4";
 
