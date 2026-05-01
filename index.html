@@ -3,15 +3,36 @@
 <head>
   <title>Paperlyx Dashboard</title>
 
-  <!-- Supabase v2 (IMPORTANT) -->
+  <!-- ✅ Supabase v2 -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+
+<h1>Paperlyx Dashboard</h1>
+
+<!-- Login -->
+<input type="email" id="email" placeholder="Enter email">
+<input type="password" id="password" placeholder="Enter password">
+<button onclick="signIn()">Sign In</button>
+
+<p id="status">Loading...</p>
+
+<!-- Admin Panel -->
+<div id="adminPanel" style="display:none;">
+  <h2>Admin Panel</h2>
+  <p>Welcome Admin ✅</p>
+</div>
+
 <script>
 document.addEventListener("DOMContentLoaded", function () {
 
-  const supabaseUrl = "https://dvjybwqyeraasykclvzy.supabase.co";
+  const supabaseUrl = "https://dvyjbwqyeraasykclvzy.supabase.co";
   const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR2eWpid3F5ZXJhYXN5a2Nsdnp5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5NjYyMzcsImV4cCI6MjA5MjU0MjIzN30.vNkfwSG3PklevSuE-cyVLEgIlgpljb0CNkH-efSemA4";
 
   const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
 
+  // 🔐 Sign In
   async function signIn() {
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
@@ -21,6 +42,8 @@ document.addEventListener("DOMContentLoaded", function () {
       password
     });
 
+    console.log("LOGIN:", data, error);
+
     if (error) {
       alert(error.message);
     } else {
@@ -29,33 +52,42 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
+  // 👤 Load User
   async function loadUser() {
-    document.getElementById("status").innerText = "Loading...";
+    const statusEl = document.getElementById("status");
+    statusEl.innerText = "Loading...";
 
     const { data: { user } } = await supabaseClient.auth.getUser();
+    console.log("USER:", user);
 
     if (!user) {
-      document.getElementById("status").innerText = "Not logged in";
+      statusEl.innerText = "Not logged in";
       return;
     }
 
-    const { data } = await supabaseClient
+    const { data, error } = await supabaseClient
       .from("user_roles")
       .select("role")
       .eq("user_id", user.id)
       .single();
 
-    document.getElementById("status").innerText = "Loaded";
+    console.log("ROLE:", data, error);
 
-    if (data?.role === "admin") {
+    statusEl.innerText = "Loaded";
+
+    if (data && data.role === "admin") {
       document.getElementById("adminPanel").style.display = "block";
     }
   }
 
-  // expose button function
+  // expose function to button
   window.signIn = signIn;
 
+  // run on load
   loadUser();
 });
 </script>
+
+</body>
+</html>
 
