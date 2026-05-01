@@ -1,18 +1,21 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
   <title>Paperlyx Dashboard</title>
 
-  <!-- ✅ Supabase Script (IMPORTANT) -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <!-- Supabase v2 (IMPORTANT) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
-<<input type="email" id="email" placeholder="Enter email">
-<input type="password" id="password" placeholder="Enter password">
-
-<button onclick="signIn()">Sign In</button>>
+<body>
 
 <h1>Paperlyx Dashboard</h1>
+
+<!-- Login -->
+<input type="email" id="email" placeholder="Enter email">
+<input type="password" id="password" placeholder="Enter password">
+<button onclick="signIn()">Sign In</button>
+
 <p id="status">Loading...</p>
 
 <!-- Admin Panel -->
@@ -22,10 +25,13 @@
 </div>
 
 <script>
-const supabaseClient = supabase.createClient(
-  "https://dvjybwqyeraasykclvzy.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR2eWpid3F5ZXJhYXN5a2Nsdnp5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5NjYyMzcsImV4cCI6MjA5MjU0MjIzN30.vNkfwSG3PklevSuE-cyVLEgIlgpljb0CNkH-efSemA4"
-);
+const supabaseUrl = "https://dvjybwqyeraasykclvzy.supabase.co";
+const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR2eWpid3F5ZXJhYXN5a2Nsdnp5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5NjYyMzcsImV4cCI6MjA5MjU0MjIzN30.vNkfwSG3PklevSuE-cyVLEgIlgpljb0CNkH-efSemA4";
+
+// ✅ Correct client
+const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+// 🔐 Sign In
 async function signIn() {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
@@ -41,12 +47,15 @@ async function signIn() {
     alert(error.message);
   } else {
     alert("Login successful!");
+    loadUser(); // reload after login
   }
 }
+
+// 👤 Load User
 async function loadUser() {
   console.log("START");
 
-  const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
+  const { data: { user } } = await supabaseClient.auth.getUser();
   console.log("USER:", user);
 
   if (!user) {
@@ -54,13 +63,14 @@ async function loadUser() {
     return;
   }
 
+  // 🔐 Get role
   const { data, error } = await supabaseClient
     .from("user_roles")
     .select("role")
     .eq("user_id", user.id)
     .single();
 
-  console.log("ROLE:", data);
+  console.log("ROLE:", data, error);
 
   document.getElementById("status").innerText = "Loaded";
 
@@ -69,6 +79,7 @@ async function loadUser() {
   }
 }
 
+// Run on load
 loadUser();
 </script>
 
